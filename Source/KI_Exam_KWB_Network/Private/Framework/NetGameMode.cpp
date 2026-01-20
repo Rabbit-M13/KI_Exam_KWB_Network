@@ -6,7 +6,7 @@
 #include "Framework/NetPlayerState.h"
 #include "Framework/NetPlayerController.h"
 #include "UI/NetHUD.h"
-#include "Kismet/GameplayStatics.h" // (재검토)
+#include "Kismet/GameplayStatics.h"
 
 ANetGameMode::ANetGameMode()
 {
@@ -38,9 +38,8 @@ void ANetGameMode::PostLogin(APlayerController* NewPlayer)
 		const int32 CurrentPlayers = GetNumPlayers();
 		if (CurrentPlayers > ConnectionNumberLimit)
 		{
-			// (재검토)
-			UE_LOG(LogTemp, Warning, TEXT("Connection limit reached. Kicking Player."));
-			NewPlayer->ClientReturnToMainMenuWithTextReason(FText::FromString(TEXT("Connection limit reached.")));
+			UE_LOG(LogTemp, Warning, TEXT("정원 가득참. 서버에서 연결해제."));
+			NewPlayer->ClientReturnToMainMenuWithTextReason(FText::FromString(TEXT("정원 가득참.")));
 			NewPlayer->Destroy();
 		}
 	}

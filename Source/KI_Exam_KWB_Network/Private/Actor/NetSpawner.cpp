@@ -3,6 +3,7 @@
 
 #include "Actor/NetSpawner.h"
 #include "Components/BoxComponent.h"
+#include "Framework/NetGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ANetSpawner::ANetSpawner()
@@ -36,6 +37,15 @@ void ANetSpawner::TrySpawnPickup()
 	if (!HasAuthority() || !PickupClass)
 	{
 		return;
+	}
+
+	if (const ANetGameState* NetGameState = GetWorld()->GetGameState<ANetGameState>())
+	{
+		if (NetGameState->IsGameOver())
+		{
+			GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+			return;
+		}
 	}
 
 	FVector SpawnLocation;

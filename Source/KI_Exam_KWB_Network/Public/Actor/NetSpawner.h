@@ -33,9 +33,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "KWB|Spawner")
 	float SpawnCheckRadius = 60.0f;
 
-	// (재검토). 이 변수의 존재의미
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "KWB|Spawner")
-	int32 MaxSpawnAttempts = 12;
+	int32 MaxSpawnAttempts = 19;
 
 private:
 	FTimerHandle SpawnTimerHandle;
