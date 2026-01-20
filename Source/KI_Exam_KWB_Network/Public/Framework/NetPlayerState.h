@@ -15,6 +15,8 @@ class KI_EXAM_KWB_NETWORK_API ANetPlayerState : public APlayerState
 	GENERATED_BODY()
 	
 public:
+	ANetPlayerState();
+
 	UFUNCTION(BlueprintCallable, Category = "KWB|Score")
 	void AddPickupCount(int32 InAmount);
 

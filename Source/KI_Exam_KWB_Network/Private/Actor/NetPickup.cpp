@@ -2,26 +2,50 @@
 
 
 #include "Actor/NetPickup.h"
+#include "Components/SphereComponent.h"
+#include "GameFramework/Character.h"
+#include "Framework/NetPlayerState.h"
 
-// Sets default values
 ANetPickup::ANetPickup()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 
+	Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
+	Collision->InitSphereRadius(50.0f);
+	SetRootComponent(Collision);
+	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Collision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Collision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	Mesh->SetupAttachment(Collision);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Mesh->SetRelativeLocation(FVector::UpVector * 30.0f);
 }
 
-// Called when the game starts or when spawned
 void ANetPickup::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Collision->OnComponentBeginOverlap.AddDynamic(this, &ANetPickup::OnOverlap);
 }
 
-// Called every frame
-void ANetPickup::Tick(float DeltaTime)
+void ANetPickup::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::Tick(DeltaTime);
+	if (!HasAuthority())
+	{
+		return;
+	}
 
+	ACharacter* Character = Cast<ACharacter>(OtherActor);
+	if (!Character)
+	{
+		return;
+	}
+
+	if (ANetPlayerState* NetPlayerState = Character->GetPlayerState<ANetPlayerState>())
+	{
+		NetPlayerState->AddPickupCount(PickupValue);
+		Destroy();
+	}
 }
-

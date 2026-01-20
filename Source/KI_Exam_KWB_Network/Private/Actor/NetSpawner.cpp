@@ -3,7 +3,7 @@
 
 #include "Actor/NetSpawner.h"
 #include "Components/BoxComponent.h"
-//#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ANetSpawner::ANetSpawner()
 {
@@ -13,7 +13,7 @@ ANetSpawner::ANetSpawner()
 	SpawnArea = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnArea"));
 	SetRootComponent(SpawnArea);
 	SpawnArea->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	SpawnArea->SetBoxExtent(FVector(1000.0f, 1000.0f, 200.0f));
+	SpawnArea->SetBoxExtent(FVector(1000.0f, 1000.0f, 200.0f)); // 1200, 1600, 120 정도로 테스트 일단 해봄
 }
 
 void ANetSpawner::BeginPlay()
@@ -51,5 +51,48 @@ void ANetSpawner::TrySpawnPickup()
 
 bool ANetSpawner::FindSpawnLocation(FVector& OutLocation) const
 {
+	if (!SpawnArea)
+	{
+		return false;
+	}
+
+	const FVector Origin = SpawnArea->GetComponentLocation();
+	const FVector Extent = SpawnArea->GetScaledBoxExtent();
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	for (int32 Attempt = 0; Attempt < MaxSpawnAttempts; ++Attempt)
+	{
+		const FVector RandomOffset = UKismetMathLibrary::RandomPointInBoundingBox(FVector::ZeroVector, Extent);
+		const FVector Candidate = Origin + RandomOffset;
+		const bool bOverlapWorld = GetWorld()->OverlapAnyTestByChannel(
+			Candidate,
+			FQuat::Identity,
+			ECC_WorldStatic,
+			FCollisionShape::MakeSphere(SpawnCheckRadius),
+			Params);
+
+		if (bOverlapWorld)
+		{
+			continue;
+		}
+
+		const bool bOverlapPawn = GetWorld()->OverlapAnyTestByChannel(
+			Candidate,
+			FQuat::Identity,
+			ECC_Pawn,
+			FCollisionShape::MakeSphere(SpawnCheckRadius),
+			Params);
+
+		if (bOverlapPawn)
+		{
+			continue;
+		}
+
+		OutLocation = Candidate;
+		return true;
+	}
+
 	return false;
 }

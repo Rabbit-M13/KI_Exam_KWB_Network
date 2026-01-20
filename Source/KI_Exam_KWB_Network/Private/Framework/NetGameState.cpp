@@ -55,7 +55,7 @@ void ANetGameState::ResolveMatchResult()
 			}
 			else if (Score == BestScore)
 			{
-				bDraw = false;
+				bDraw = true;
 			}
 		}
 	}

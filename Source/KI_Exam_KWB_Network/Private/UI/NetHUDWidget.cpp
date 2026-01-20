@@ -91,11 +91,11 @@ void UNetHUDWidget::UpdateResult()
 
 	if (NetGameState->IsDraw())
 	{
-		ResultText->SetText(FText::FromString(TEXT("Draw")));
+		ResultText->SetText(FText::FromString(TEXT("Draw!")));
 	}
 	else if (MyState && NetGameState->GetWinnerPlayerId() == MyState->GetPlayerId())
 	{
-		ResultText->SetText(FText::FromString(TEXT("Victory")));
+		ResultText->SetText(FText::FromString(TEXT("Victory!!")));
 	}
 	else
 	{
